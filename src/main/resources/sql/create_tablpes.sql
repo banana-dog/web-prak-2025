@@ -2,6 +2,7 @@ create type status as enum ('active', 'closed', 'suspended');
 create type currency as enum ('rub', 'usd', 'eur');
 create type account_type as enum ('credit', 'deposit', 'savings', 'checking');
 create type payment_method as enum ('auto', 'manual');
+create type client_type as enum('natural person', 'legal entity')
 
 drop table if exists client cascade;
 create table client
@@ -9,7 +10,8 @@ create table client
     "id"         serial primary key,
     "first_name" text not null,
     "last_name"  text not null,
-    "contacts"   text
+    "contacts"   text,
+    "type" client_type not null
 );
 
 drop table if exists bank_branch cascade;
@@ -28,7 +30,7 @@ create table account
     "client_id"       integer references client ("id"),
     "status"          status       null,
     "currency"        currency     not null,
-    "current_balance" integer      not null,
+    "current_balance" float      not null,
     "account_type"    account_type not null,
     "bank_branch"     integer references bank_branch ("id"),
     "opening_date"    date    not null
@@ -41,8 +43,8 @@ create table credit_account
     "max_credit"               float check ( "max_credit" >= 0),
     "current_debt"             float check ( "current_debt" >= 0 ),
     "interest_rate"            float check ( "interest_rate" >= 0),
-    "repayment_restriction"    varchar(100),
-    "interest_payout_interval" varchar(20)    not null,
+    "repayment_restriction"    text,
+    "interest_payout_interval" varchar(50)    not null,
     "payment_method"           payment_method not null
 );
 
@@ -58,7 +60,7 @@ create table deposit_account
 drop table if exists savings_account cascade;
 create table savings_account
 (
-    "id"                       integer references account ("account_id"),
+    "id"                       integer primary key references account ("account_id"),
     "interest_rate"            float check ( "interest_rate" >= 0),
     "interest_payout_interval" varchar(50) not null,
     "withdrawal_limit"         float check ( "withdrawal_limit" >= 0)

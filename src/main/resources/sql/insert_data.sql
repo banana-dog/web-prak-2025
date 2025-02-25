@@ -1,9 +1,9 @@
-insert into client("first_name", "last_name", "contacts")
-values ('Иван', 'Иванов', 'ivan@example.com'),
-       ('Мария', 'Петрова', 'maria@example.com'),
-       ('Алексей', 'Сидоров', 'alex@example.com'),
-       ('Ольга', 'Смирнова', 'olga@example.com'),
-       ('Дмитрий', 'Козлов', 'dmitry@example.com')
+insert into client("first_name", "last_name", "contacts", "type")
+values ('Иван', 'Иванов', 'ivan@example.com', 'natural person'),
+       ('Мария', 'Петрова', 'maria@example.com', 'legal entity'),
+       ('Алексей', 'Сидоров', 'alex@example.com', 'natural person'),
+       ('Ольга', 'Смирнова', 'olga@example.com', 'legal entity'),
+       ('Дмитрий', 'Козлов', 'dmitry@example.com', 'natural person')
 returning "id";
 
 insert into bank_branch("address", "name")
