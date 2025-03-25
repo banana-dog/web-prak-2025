@@ -33,13 +33,7 @@ public class ClientDAOImpl extends CommonDAOImpl<Client, Long> implements Client
         CriteriaQuery<Client> criteriaQuery = criteriaBuilder.createQuery(Client.class);
         Root<Client> root = criteriaQuery.from(Client.class);
 
-        criteriaQuery.select(criteriaBuilder.construct(
-                Client.class,
-                root.get("id"),
-                root.get("firstName"),
-                root.get("lastName"),
-                root.get("type")
-        ));
+        criteriaQuery.select(root);
 
         List<Predicate> predicates = new ArrayList<>();
         if (filter.getFirstName() != null)

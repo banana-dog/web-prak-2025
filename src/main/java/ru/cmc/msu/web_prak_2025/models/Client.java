@@ -28,7 +28,7 @@ public class Client implements CommonEntity<Long> {
 
     @Column(nullable = false, name = "first_name")
     @NonNull
-    private  String firstName;
+    private String firstName;
 
     @Column(nullable = false, name = "last_name")
     @NonNull
@@ -36,7 +36,7 @@ public class Client implements CommonEntity<Long> {
 
     @Column(nullable = false, name = "contacts")
     @NonNull
-    private  String contacts;
+    private String contacts;
 
     @Column(nullable = false, name = "type")
     @NonNull
