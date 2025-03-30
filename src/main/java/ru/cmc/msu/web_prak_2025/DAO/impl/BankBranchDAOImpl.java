@@ -48,7 +48,7 @@ public class BankBranchDAOImpl extends CommonDAOImpl<BankBranch, Long> implement
         }
     }
 
-    private String likeExpr(String param) {
+    String likeExpr(String param) {
         return "%" + param + "%";
     }
 

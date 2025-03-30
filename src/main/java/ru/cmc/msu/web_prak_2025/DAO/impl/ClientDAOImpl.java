@@ -21,9 +21,9 @@ import java.util.Optional;
 @Repository
 public class ClientDAOImpl extends CommonDAOImpl<Client, Long> implements ClientDAO {
     @PersistenceContext
-    protected EntityManager entityManager;
+    public EntityManager entityManager;
 
-    public ClientDAOImpl() {
+    public ClientDAOImpl(Class<Client> clientClass) {
         super(Client.class);
     }
 
@@ -67,7 +67,7 @@ public class ClientDAOImpl extends CommonDAOImpl<Client, Long> implements Client
         }
     }
 
-    private String likeExpr(String param) {
+    public String likeExpr(String param) {
         return "%" + param + "%";
     }
 }

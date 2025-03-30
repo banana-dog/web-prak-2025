@@ -5,9 +5,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class WebPrak2025ApplicationTests {
-
 	@Test
 	void contextLoads() {
 	}
-
 }
+

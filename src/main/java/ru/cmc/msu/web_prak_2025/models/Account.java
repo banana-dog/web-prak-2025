@@ -64,6 +64,8 @@ public class Account implements CommonEntity<Long> {
 
     @Column(nullable = false, name = "current_balance")
     @NonNull
+    @Getter
+    @Setter
     private Float currentBalance;
 
     @Column(nullable = false, name = "account_type")
