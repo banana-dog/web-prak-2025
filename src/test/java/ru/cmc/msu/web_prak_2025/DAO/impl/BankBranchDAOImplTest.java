@@ -200,7 +200,6 @@ public class BankBranchDAOImplTest {
     private Path<Object> idPath;
     @Test
     public void testGetClientsByBranchId() {
-        // Setup
         Long branchId = 1L;
         Client client1 = new Client();
         client1.setId(1L);

@@ -1,9 +1,8 @@
 package ru.cmc.msu.web_prak_2025.DAO.impl;
 
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.verification.VerificationMode;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import ru.cmc.msu.web_prak_2025.DAO.ClientDAO;
@@ -43,13 +42,14 @@ public class ClientDAOImplTest {
     @Mock
     private Query nativeQuery;
 
+    @InjectMocks
     private ClientDAOImpl clientDAO;
 
     @BeforeMethod
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        clientDAO = new ClientDAOImpl(Client.class); // Добавьте такой конструктор в ClientDAOImpl
         clientDAO.entityManager = entityManager;
+        clientDAO.setEntityManager(entityManager);
     }
 
     @Test
@@ -250,5 +250,154 @@ public class ClientDAOImplTest {
         String result = clientDAO.likeExpr(input);
 
         assertEquals(result, "%test%");
+    }
+
+    @Test
+    public void testGetById() {
+        Long clientId = 1L;
+        Client expectedClient = new Client("John", "Doe", "contact", ClientType.NATURAL_PERSON);
+        expectedClient.setId(clientId);
+
+        when(entityManager.find(Client.class, clientId)).thenReturn(expectedClient);
+
+        Client result = clientDAO.getById(clientId);
+
+        assertEquals(result, expectedClient);
+        verify(entityManager, times(1)).find(Client.class, clientId);
+    }
+
+    @Test
+    public void testGetAll() {
+        List<Client> expectedClients = Arrays.asList(
+                new Client("John", "Doe", "contact1", ClientType.NATURAL_PERSON),
+                new Client("Jane", "Smith", "contact2", ClientType.NATURAL_PERSON)
+        );
+
+        when(entityManager.createQuery(anyString(), eq(Client.class))).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(expectedClients);
+
+        Collection<Client> result = clientDAO.getAll();
+
+        assertEquals(result.size(), expectedClients.size());
+        assertTrue(result.containsAll(expectedClients));
+        verify(entityManager, times(1))
+                .createQuery("FROM Client", Client.class);
+        verify(typedQuery, times(1)).getResultList();
+    }
+
+    @Test
+    public void testSave() {
+        Client newClient = new Client("New", "Client", "contact", ClientType.LEGAL_ENTITY);
+
+        clientDAO.save(newClient);
+
+        verify(entityManager, times(1)).persist(newClient);
+    }
+
+    @Test
+    public void testUpdate() {
+        Client existingClient = new Client("Existing", "Client", "contact", ClientType.NATURAL_PERSON);
+        existingClient.setId(1L);
+
+        when(entityManager.merge(existingClient)).thenReturn(existingClient);
+
+        clientDAO.update(existingClient);
+
+        verify(entityManager, times(1)).merge(existingClient);
+    }
+
+    @Test
+    public void testDelete() {
+        Client clientToDelete = new Client("ToDelete", "Client", "contact", ClientType.LEGAL_ENTITY);
+        clientToDelete.setId(2L);
+
+        clientDAO.delete(clientToDelete);
+
+        verify(entityManager, times(1)).remove(clientToDelete);
+    }
+
+    @Test
+    public void testDeleteById() {
+        Long clientId = 3L;
+        Client clientToDelete = new Client("ToDeleteById", "Client", "contact", ClientType.NATURAL_PERSON);
+        clientToDelete.setId(clientId);
+
+        when(entityManager.find(Client.class, clientId)).thenReturn(clientToDelete);
+
+        clientDAO.deleteById(clientId);
+
+        verify(entityManager, times(1)).find(Client.class, clientId);
+        verify(entityManager, times(1)).remove(clientToDelete);
+    }
+
+    @Test
+    public void testSaveCollection_Null() {
+        clientDAO.saveCollection(null);
+
+        verify(entityManager, never()).persist(any());
+    }
+
+    @Test
+    public void testSaveCollection_Empty() {
+        List<Client> emptyList = Collections.emptyList();
+
+        clientDAO.saveCollection(emptyList);
+
+        verify(entityManager, never()).persist(any());
+    }
+
+    @Test
+    public void testSaveCollection() {
+        List<Client> clients = Arrays.asList(
+                new Client("Client1", "Last1", "contact1", ClientType.NATURAL_PERSON),
+                new Client("Client2", "Last2", "contact2", ClientType.LEGAL_ENTITY)
+        );
+
+        clientDAO.saveCollection(clients);
+
+        verify(entityManager, times(clients.size())).persist(any(Client.class));
+        for (Client client : clients) {
+            verify(entityManager, times(1)).persist(client);
+        }
+    }
+
+    @Test
+    public void testSaveCollection_WithNonNullIds() {
+        List<Client> clients = Arrays.asList(
+                new Client("Client1", "Last1", "contact1", ClientType.NATURAL_PERSON),
+                new Client("Client2", "Last2", "contact2", ClientType.LEGAL_ENTITY)
+        );
+        clients.get(0).setId(1L);
+        clients.get(1).setId(2L);
+
+        clientDAO.saveCollection(clients);
+
+        assertNull(clients.get(0).getId());
+        assertNull(clients.get(1).getId());
+
+        verify(entityManager, times(clients.size())).persist(any(Client.class));
+        for (Client client : clients) {
+            verify(entityManager, times(1)).persist(client);
+        }
+    }
+
+    @Test
+    public void testSaveCollection_WithNullIds() {
+        List<Client> clients = Arrays.asList(
+                new Client("Client1", "Last1", "contact1", ClientType.NATURAL_PERSON),
+                new Client("Client2", "Last2", "contact2", ClientType.LEGAL_ENTITY)
+        );
+        clients.get(0).setId(null);
+        clients.get(1).setId(null);
+
+        clientDAO.saveCollection(clients);
+
+        assertNull(clients.get(0).getId());
+        assertNull(clients.get(1).getId());
+
+        verify(entityManager, times(clients.size())).persist(any(Client.class));
+        for (Client client : clients) {
+            verify(entityManager, times(1)).persist(client);
+        }
     }
 }

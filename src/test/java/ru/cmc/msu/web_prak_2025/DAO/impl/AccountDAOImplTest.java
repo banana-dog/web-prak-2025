@@ -18,7 +18,6 @@ import ru.cmc.msu.web_prak_2025.models.Client;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.*;
 
 import static org.testng.Assert.*;
@@ -88,7 +87,6 @@ public class AccountDAOImplTest {
 
     @Test
     public void testGetByFilter_AllFilters() {
-        // Подготовка тестовых данных
         Client client = new Client();
         client.setId(1L);
 
@@ -100,7 +98,6 @@ public class AccountDAOImplTest {
         account1.setAccountType(Account.AccountType.CHECKING);
         account1.setOpeningDate(openingDate);
 
-        // Создаем фильтр со всеми параметрами
         AccountDAO.Filter filter = new AccountDAO.Filter(
                 1L,
                 Account.AccountType.CHECKING,
@@ -122,7 +119,6 @@ public class AccountDAOImplTest {
 
     @Test
     public void testGetByFilter_OnlyClientId() {
-        // Подготовка тестовых данных
         Client client = new Client();
         client.setId(1L);
 
@@ -131,7 +127,6 @@ public class AccountDAOImplTest {
         account1.setClientId(client);
         account1.setAccountType(Account.AccountType.SAVINGS);
 
-        // Фильтр только по clientId
         AccountDAO.Filter filter = new AccountDAO.Filter(1L, null, null);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
@@ -149,7 +144,6 @@ public class AccountDAOImplTest {
 
     @Test
     public void testGetByFilter_OnlyAccountType() {
-        // Подготовка тестовых данных
         Client client = new Client();
         client.setId(1L);
 
@@ -158,7 +152,6 @@ public class AccountDAOImplTest {
         account1.setClientId(client);
         account1.setAccountType(Account.AccountType.CREDIT);
 
-        // Фильтр только по accountType
         AccountDAO.Filter filter = new AccountDAO.Filter(null, Account.AccountType.CREDIT, null);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
@@ -176,7 +169,6 @@ public class AccountDAOImplTest {
 
     @Test
     public void testGetByFilter_OnlyOpeningDate() throws ParseException {
-        // Подготовка тестовых данных
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date openingDate = sdf.parse("2023-01-01");
 
@@ -184,7 +176,6 @@ public class AccountDAOImplTest {
         account1.setId(1L);
         account1.setOpeningDate(openingDate);
 
-        // Фильтр только по openingDate
         AccountDAO.Filter filter = new AccountDAO.Filter(null, null, openingDate);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
@@ -202,7 +193,6 @@ public class AccountDAOImplTest {
 
     @Test
     public void testGetByFilter_ClientIdAndAccountType() {
-        // Подготовка тестовых данных
         Client client = new Client();
         client.setId(1L);
 
@@ -211,7 +201,6 @@ public class AccountDAOImplTest {
         account1.setClientId(client);
         account1.setAccountType(Account.AccountType.DEPOSIT);
 
-        // Фильтр по clientId и accountType
         AccountDAO.Filter filter = new AccountDAO.Filter(1L, Account.AccountType.DEPOSIT, null);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
@@ -229,7 +218,6 @@ public class AccountDAOImplTest {
 
     @Test
     public void testGetByFilter_ClientIdAndOpeningDate() throws ParseException {
-        // Подготовка тестовых данных
         Client client = new Client();
         client.setId(1L);
 
@@ -241,7 +229,6 @@ public class AccountDAOImplTest {
         account1.setClientId(client);
         account1.setOpeningDate(openingDate);
 
-        // Фильтр по clientId и openingDate
         AccountDAO.Filter filter = new AccountDAO.Filter(1L, null, openingDate);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
@@ -259,7 +246,6 @@ public class AccountDAOImplTest {
 
     @Test
     public void testGetByFilter_AccountTypeAndOpeningDate() throws ParseException {
-        // Подготовка тестовых данных
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date openingDate = sdf.parse("2023-01-01");
 
@@ -268,7 +254,6 @@ public class AccountDAOImplTest {
         account1.setAccountType(Account.AccountType.SAVINGS);
         account1.setOpeningDate(openingDate);
 
-        // Фильтр по accountType и openingDate
         AccountDAO.Filter filter = new AccountDAO.Filter(null, Account.AccountType.SAVINGS, openingDate);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
@@ -286,14 +271,12 @@ public class AccountDAOImplTest {
 
     @Test
     public void testGetByFilter_NoFilters() {
-        // Подготовка тестовых данных
         Account account1 = new Account();
         account1.setId(1L);
 
         Account account2 = new Account();
         account2.setId(2L);
 
-        // Фильтр без параметров (должен вернуть все счета)
         AccountDAO.Filter filter = new AccountDAO.Filter(null, null, null);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);

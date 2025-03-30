@@ -1,12 +1,11 @@
 package ru.cmc.msu.web_prak_2025;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.testng.annotations.Test;
 
 @SpringBootTest
-class WebPrak2025ApplicationTests {
+public class WebPrak2025ApplicationTests {
 	@Test
-	void contextLoads() {
+	public void contextLoads() {
 	}
 }
-
