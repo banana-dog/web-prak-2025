@@ -62,32 +62,30 @@ public class BankBranchController {
 
     @Transactional
     @RequestMapping(value = "/add_new_branch", method = RequestMethod.POST)
-    public String addBankBranch(@RequestParam String name, @RequestParam String address) {
+    public ResponseEntity<Void> addBankBranch(@RequestBody BankBranch newBranch) {
         try {
-            BankBranch newBank = new BankBranch(address, name);
-            bankBranchDAO.save(newBank);
-            return "redirect:/bank/" + newBank.getId().toString();
-        } catch (IllegalArgumentException e) {
-            return "redirect:/error?message=" + e.getMessage();
+            bankBranchDAO.save(newBranch);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return "redirect:/error?message=An unexpected error occurred";
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public String editBankBranch(@PathVariable("id") Long id,
-                                 @RequestParam(required = false) String name, @RequestParam(required = false) String address) {
+    public ResponseEntity<Void> editBankBranch(@PathVariable("id") Long id,
+                                               @RequestBody BankBranch branchUpdates) {
         BankBranch branch = bankBranchDAO.getById(id);
 
-        if (name != null) {
-            branch.setName(name);
-        }
-        if (address != null) {
-            branch.setAddress(address);
+        if (branch == null) {
+            return ResponseEntity.notFound().build();
         }
 
+        branch.setName(branchUpdates.getName());
+        branch.setAddress(branchUpdates.getAddress());
+        branch.setClientsNumber(branchUpdates.getClientsNumber());
+
         bankBranchDAO.update(branch);
-        return "redirect:/bank/" + branch.getId().toString();
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")

@@ -7,7 +7,7 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(name = "bank_branch")
+@Table(name = "bank_branch", schema = "bank")
 @Getter
 @Setter
 @ToString

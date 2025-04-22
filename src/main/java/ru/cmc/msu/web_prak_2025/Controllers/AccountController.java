@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.cmc.msu.web_prak_2025.DAO.AccountDAO;
 import ru.cmc.msu.web_prak_2025.DAO.BankBranchDAO;
 import ru.cmc.msu.web_prak_2025.DAO.ClientDAO;
-import ru.cmc.msu.web_prak_2025.models.Account;
+import ru.cmc.msu.web_prak_2025.models.*;
 
 import java.util.Date;
 import java.util.List;
@@ -77,30 +77,71 @@ public class AccountController {
     public ResponseEntity<Void> createAccount(@RequestBody AccountDAO.AccountAllInfo accountInfo) {
         try {
             AccountDAO.AccountMainInfo mainInfo = accountInfo.getMainInfo();
-            Account account = new Account(clientDAO.getById(mainInfo.getClientId()), mainInfo.getStatus(), mainInfo.getCurrency(), mainInfo.getBalance(), mainInfo.getType(), bankBranchDAO.getById(mainInfo.getBankBranchId()), mainInfo.getOpeningDate());
+            AccountDAO.AccountAdditionalInfo additionalInfo = accountInfo.getAdditionalInfo();
+            if (mainInfo.getClientId() == null || clientDAO.getById(mainInfo.getClientId()) == null) {
+                throw new IllegalArgumentException("Invalid client ID");
+            }
+            if (mainInfo.getBankBranchId() == null || bankBranchDAO.getById(mainInfo.getBankBranchId()) == null) {
+                throw new IllegalArgumentException("Invalid bank branch ID");
+            }
+            // Создаем основной объект счета
+            Account account = new Account();
+            account.setClientId(clientDAO.getById(mainInfo.getClientId()));
+            account.setAccountStatus(Account.Status.valueOf(String.valueOf(mainInfo.getStatus())));
+            account.setAccountCurrency(Account.Currency.valueOf(String.valueOf(mainInfo.getCurrency())));
+            account.setCurrentBalance(mainInfo.getBalance());
+            account.setAccountType(Account.AccountType.valueOf(String.valueOf(mainInfo.getType())));
+            account.setBranchId(bankBranchDAO.getById(mainInfo.getBankBranchId()));
+            account.setOpeningDate(mainInfo.getOpeningDate());
+
+            // Сохраняем основную информацию о счете
             accountDAO.save(account);
 
-            AccountDAO.AccountAdditionalInfo additionalInfo = accountInfo.getAdditionalInfo();
+            // Обрабатываем разные типы счетов
             switch (account.getAccountType()) {
                 case CHECKING:
-                    accountDAO.createCheckingAccount(additionalInfo, mainInfo.getId());
+                    CheckingAccount checkingAccount = new CheckingAccount();
+                    checkingAccount.setAccount(account);
+                    checkingAccount.setOverdraftLimit(additionalInfo.getOverdraftLimit());
+                    account.setCheckingAccount(checkingAccount);
                     break;
+
                 case SAVINGS:
-                    accountDAO.createSavingsAccount(additionalInfo, mainInfo.getId());
+                    SavingsAccount savingsAccount = new SavingsAccount();
+                    savingsAccount.setAccount(account);
+                    savingsAccount.setInterestRate(additionalInfo.getInterestRate());
+                    account.setSavingsAccount(savingsAccount);
                     break;
+
                 case CREDIT:
-                    accountDAO.createCreditAccount(additionalInfo, mainInfo.getId());
+                    CreditAccount creditAccount = new CreditAccount();
+                    creditAccount.setAccount(account);
+                    creditAccount.setInterestRate(additionalInfo.getInterestRate());
+                    creditAccount.setMaxCredit(additionalInfo.getMaxCredit());
+                    creditAccount.setCurrentDebt(additionalInfo.getCurrentDebt());
+                    account.setCreditAccount(creditAccount);
                     break;
+
                 case DEPOSIT:
-                    accountDAO.createDepositAccount(additionalInfo, mainInfo.getId());
+                    DepositAccount depositAccount = new DepositAccount();
+                    depositAccount.setAccount(account);
+                    depositAccount.setInterestRate(additionalInfo.getInterestRate());
+                    depositAccount.setMaturityDate(additionalInfo.getMaturityDate());
+                    account.setDepositAccount(depositAccount);
                     break;
+
                 default:
                     throw new IllegalArgumentException("Unsupported account type: " + account.getAccountType());
             }
 
+            accountDAO.update(account);
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid account type", e);
             return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            log.error("Error creating account", e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 

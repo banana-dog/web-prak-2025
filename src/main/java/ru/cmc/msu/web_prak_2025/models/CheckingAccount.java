@@ -5,7 +5,7 @@ import lombok.*;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "checking_account")
+@Table(name = "checking_account", schema = "bank")
 @Getter
 @Setter
 @ToString

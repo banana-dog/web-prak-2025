@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.Date;
 
 @Entity
-@Table(name = "account")
+@Table(name = "account", schema = "bank")
 @Getter
 @Setter
 @ToString

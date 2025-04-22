@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление клиентами</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1>Клиенты</h1>
+
+    <!-- Фильтры -->
+    <div class="filter-section">
+        <h3>Фильтрация клиентов</h3>
+        <form id="filterForm" onsubmit="return false;">
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="firstName"></label><input type="text" class="form-control" id="firstName"
+                                                          placeholder="Имя">
+                </div>
+                <div class="col-md-4">
+                    <label for="lastName"></label><input type="text" class="form-control" id="lastName"
+                                                         placeholder="Фамилия">
+                </div>
+                <div class="col-md-4">
+                    <label for="type"></label><select class="form-select" id="type">
+                    <option value="">Все типы</option>
+                    <option value="NATURAL_PERSON">Физ. лицо</option>
+                    <option value="LEGAL_ENTITY">Юр. лицо</option>
+                </select>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary mt-3" onclick="applyFilters()">Применить фильтр</button>
+            <button type="button" class="btn btn-primary mt-3" onclick="resetFilters()">Сбросить фильтр</button>
+        </form>
+    </div>
+
+    <!-- Таблица клиентов -->
+    <div class="table-section mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Список клиентов</h3>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addClientModal">
+                Добавить нового клиента
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Фамилия</th>
+                    <th>Имя</th>
+                    <th>Контактные данные</th>
+                    <th>Тип</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="client : ${clients}">
+                    <td th:text="${client.id}"></td>
+                    <td th:text="${client.lastName}"></td>
+                    <td th:text="${client.firstName}"></td>
+                    <td th:text="${client.contacts}"></td>
+                    <td>
+                        <span th:if="${client.type.name() == 'NATURAL_PERSON'}" class="badge bg-primary">Физ. лицо</span>
+                        <span th:if="${client.type.name() == 'LEGAL_ENTITY'}" class="badge bg-success">Юр. лицо</span>
+                    </td>
+                    <td>
+                        <a th:href="@{'/clients/' + ${client.id}}" class="btn btn-sm btn-info">Просмотр</a>
+                        <button class="btn btn-sm btn-warning" onclick="editClient(event)"
+                                th:data-id="${client.id}"
+                                th:data-first-name="${client.firstName}"
+                                th:data-last-name="${client.lastName}"
+                                th:data-contacts="${client.contacts}"
+                                th:data-type="${client.type}">Редактировать
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteClient(event)" th:data-id="${client.id}">
+                            Удалить
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления клиента -->
+    <div class="modal fade" id="addClientModal" tabindex="-1" aria-labelledby="addClientModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addClientModalLabel">Добавление нового клиента</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addClientForm" th:action="@{/api/clients/add_new_client}" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="newFirstName" class="form-label">Имя</label>
+                            <input type="text" class="form-control" id="newFirstName" name="firstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newLastName" class="form-label">Фамилия</label>
+                            <input type="text" class="form-control" id="newLastName" name="lastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newContacts" class="form-label">Контактные данные</label>
+                            <input type="text" class="form-control" id="newContacts" name="contacts" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newType" class="form-label">Тип клиента</label>
+                            <select class="form-select" id="newType" name="type" required>
+                                <option value="NATURAL_PERSON">Физическое лицо</option>
+                                <option value="LEGAL_ENTITY">Юридическое лицо</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования клиента -->
+    <div class="modal fade" id="editClientModal" tabindex="-1" aria-labelledby="editClientModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editClientModalLabel">Редактирование клиента</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editClientForm" method="get">
+                    <input type="hidden" id="editClientId" name="client_id">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="editFirstName" class="form-label">Имя</label>
+                            <input type="text" class="form-control" id="editFirstName" name="firstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLastName" class="form-label">Фамилия</label>
+                            <input type="text" class="form-control" id="editLastName" name="lastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editContacts" class="form-label">Контактные данные</label>
+                            <input type="text" class="form-control" id="editContacts" name="contacts" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editType" class="form-label">Тип клиента</label>
+                            <select class="form-select" id="editType" name="type" required>
+                                <option value="NATURAL_PERSON">Физическое лицо</option>
+                                <option value="LEGAL_ENTITY">Юридическое лицо</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Общие функции
+    function resetFilters() {
+        document.getElementById('firstName').value = '';
+        document.getElementById('lastName').value = '';
+        document.getElementById('type').value = '';
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const params = new URLSearchParams({
+            firstName: document.getElementById('firstName').value || '',
+            lastName: document.getElementById('lastName').value || '',
+            type: document.getElementById('type').value || ''
+        });
+
+        fetch(`/api/clients/filter?${params}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => updateClientsTable(data))
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка при фильтрации клиентов');
+            });
+    }
+
+    function updateClientsTable(clients) {
+        const tbody = document.querySelector('table tbody');
+        tbody.innerHTML = '';
+
+        clients.forEach(client => {
+            const row = document.createElement('tr');
+            const clientType = client.type === 'NATURAL_PERSON' ?
+                '<span class="badge bg-primary">Физ. лицо</span>' :
+                '<span class="badge bg-success">Юр. лицо</span>';
+
+            row.innerHTML = `
+                <td>${client.id}</td>
+                <td>${client.lastName}</td>
+                <td>${client.firstName}</td>
+                <td>${client.contacts}</td>
+                <td>${clientType}</td>
+                <td>
+                    <a href="/clients/${client.id}" class="btn btn-sm btn-info">Просмотр</a>
+                    <button class="btn btn-sm btn-warning" onclick="editClient(event)"
+                        data-id="${client.id}"
+                        data-first-name="${client.firstName}"
+                        data-last-name="${client.lastName}"
+                        data-contacts="${client.contacts}"
+                        data-type="${client.type}">Редактировать</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteClient(event)"
+                        data-id="${client.id}">Удалить</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // Функции для работы с клиентами
+    function editClient(event) {
+        const button = event.currentTarget;
+        const clientId = button.getAttribute('data-id');
+        const firstName = button.getAttribute('data-first-name');
+        const lastName = button.getAttribute('data-last-name');
+        const contacts = button.getAttribute('data-contacts');
+        const type = button.getAttribute('data-type');
+
+        document.getElementById('editClientId').value = clientId;
+        document.getElementById('editFirstName').value = firstName;
+        document.getElementById('editLastName').value = lastName;
+        document.getElementById('editContacts').value = contacts;
+        document.getElementById('editType').value = type;
+
+        const modal = new bootstrap.Modal(document.getElementById('editClientModal'));
+        modal.show();
+    }
+
+    function deleteClient(event) {
+        const clientId = event.currentTarget.getAttribute('data-id');
+        if (confirm('Вы уверены, что хотите удалить этого клиента?')) {
+            fetch(`/api/clients/${clientId}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Ошибка при удалении клиента');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Произошла ошибка при удалении клиента');
+                });
+        }
+    }
+
+    // Обработчики форм
+    document.getElementById('addClientForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        fetch('/api/clients/add_new_client', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                firstName: document.getElementById('newFirstName').value,
+                lastName: document.getElementById('newLastName').value,
+                contacts: document.getElementById('newContacts').value,
+                type: document.getElementById('newType').value
+            })
+        })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('Ошибка при добавлении клиента');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+    });
+
+    document.getElementById('editClientForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const clientId = document.getElementById('editClientId').value;
+        const formData = {
+            firstName: document.getElementById('editFirstName').value,
+            lastName: document.getElementById('editLastName').value,
+            contacts: document.getElementById('editContacts').value,
+            type: document.getElementById('editType').value
+        };
+
+        fetch(`/api/clients/${clientId}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(formData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('Ошибка при обновлении клиента');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+    });
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+        // Можно добавить начальную загрузку данных, если нужно
+    });
+</script>
+</body>
+</html>

@@ -56,7 +56,7 @@ public class AccountDAOImpl extends CommonDAOImpl<Account, Long> implements Acco
     @Override
     public Optional<String> getAccountDetails(Long id) {
         try {
-            String sql = "SELECT get_account_info(:id, (SELECT account_type FROM account WHERE account_id = :id))";
+            String sql = "SELECT    get_account_info(:id, (SELECT account_type FROM account WHERE account_id = :id))";
             Query query = entityManager.createNativeQuery(sql, String.class);
             query.setParameter("id", id);
 

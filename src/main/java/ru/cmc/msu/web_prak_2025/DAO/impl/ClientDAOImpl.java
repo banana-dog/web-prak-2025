@@ -23,7 +23,7 @@ public class ClientDAOImpl extends CommonDAOImpl<Client, Long> implements Client
     @PersistenceContext
     public EntityManager entityManager;
 
-    public ClientDAOImpl(Class<Client> clientClass) {
+    public ClientDAOImpl() {
         super(Client.class);
     }
 
@@ -55,7 +55,7 @@ public class ClientDAOImpl extends CommonDAOImpl<Client, Long> implements Client
     @Override
     public Optional<String> getClientDetails(Long id) {
         try {
-            String sql = "SELECT get_client_info(:id)";
+            String sql = "SELECT bank.get_client_info(:id)";
             Query query = entityManager.createNativeQuery(sql, String.class);
             query.setParameter("id", id);
 

@@ -1,5 +1,6 @@
 package ru.cmc.msu.web_prak_2025.Controllers;
 
+import org.springframework.ui.Model;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import ru.cmc.msu.web_prak_2025.models.Client.ClientType;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -26,6 +28,7 @@ public class ClientController {
     public ClientController(ClientDAO clientDAO) {
         this.clientDAO = clientDAO;
     }
+
 
     @GetMapping("/all")
     public ResponseEntity<Collection<Client>> getAllClients() {
@@ -42,56 +45,57 @@ public class ClientController {
     @GetMapping("/details/{id}")
     public ResponseEntity<String> getClientDetails(@PathVariable Long id) {
         Optional<String> clientDetails = clientDAO.getClientDetails(id);
-        return clientDetails.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return clientDetails.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/filter")
     public ResponseEntity<List<Client>> getClientsByFilter(
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) ClientType type) {
+            @RequestParam(required = false) String type) {
 
-        List<Client> clients;
-        ClientDAO.Filter f = new ClientDAO.Filter(firstName, lastName, type);
-        clients = clientDAO.getByFilter(f);
+        ClientType clientType = null;
+        if (type != null && !type.isEmpty()) {
+            try {
+                clientType = ClientType.valueOf(type);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
+        ClientDAO.Filter f = new ClientDAO.Filter(firstName, lastName, clientType);
+        List<Client> clients = clientDAO.getByFilter(f);
 
         return ResponseEntity.ok(clients);
     }
 
     @Transactional
-    @RequestMapping(value = "/add_new_client", method = RequestMethod.POST)
-    public String addClient(@RequestBody ClientInfo clientInfo) {
+    @PostMapping("/add_new_client")
+    public ResponseEntity<Void> addClient(@RequestBody ClientInfo clientInfo) {
         try {
-            if (clientInfo.getType() == null || clientInfo.getType().trim().isEmpty()) {
-                throw new IllegalArgumentException("Client type cannot be null or empty");
-            }
-
             ClientType clientType = ClientType.valueOf(clientInfo.getType());
-            Client newClient = new Client(clientInfo.getFirstName(), clientInfo.getLastName(), clientInfo.getContacts(), clientType);
+            Client newClient = new Client(
+                    clientInfo.getFirstName(),
+                    clientInfo.getLastName(),
+                    clientInfo.getContacts(),
+                    clientType
+            );
 
             clientDAO.save(newClient);
-
-            return "redirect:/client?client_id=" + newClient.getId().toString();
-        } catch (IllegalArgumentException e) {
-            return "redirect:/error?message=" + e.getMessage();
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return "redirect:/error?message=An unexpected error occurred";
+            return ResponseEntity.badRequest().build();
         }
     }
 
-    @Getter
-    @AllArgsConstructor
-    public static class ClientInfo {
-        private String firstName;
-        private String lastName;
-        private String contacts;
-        private String type;
-    }
-
     @RequestMapping(value = "/{client_id}", method = RequestMethod.PUT)
-    public String editClient(@PathVariable("client_id") Long client_id,
-                             @RequestBody ClientInfo clientUpdateRequest) {
+    public ResponseEntity<Void> editClient(@PathVariable("client_id") Long client_id,
+                                           @RequestBody ClientInfo clientUpdateRequest) {
         Client client = clientDAO.getById(client_id);
+        if (client == null) {
+            return ResponseEntity.notFound().build();
+        }
 
         if (clientUpdateRequest.getFirstName() != null) {
             client.setFirstName(clientUpdateRequest.getFirstName());
@@ -107,8 +111,16 @@ public class ClientController {
         }
 
         clientDAO.update(client);
+        return ResponseEntity.ok().build();
+    }
 
-        return "redirect:/client?client_id=" + client.getId().toString();
+    @Getter
+    @AllArgsConstructor
+    public static class ClientInfo {
+        private String firstName;
+        private String lastName;
+        private String contacts;
+        private String type;
     }
 
     @DeleteMapping("/{id}")

@@ -3,14 +3,20 @@ CREATE OR REPLACE FUNCTION get_client_info(i BIGINT)
     LANGUAGE plpgsql AS
 $$
 BEGIN
-    return(
-        select jsonb_build_object(
-                       'name', client.first_name || ' ' || client.last_name,
-                       'contacts', client.contacts,
-                       'type', client.type,
-                       'accounts', (select get_account_info(account_id, account_type) from account where client_id = i)
+    RETURN (
+        SELECT jsonb_build_object(
+                       'name', COALESCE(bank.client.first_name || ' ' || bank.client.last_name, ''),
+                       'contacts', COALESCE(bank.client.contacts, ''),
+                       'type', COALESCE(bank.client.type::text, ''),
+                       'accounts', COALESCE(
+                               (SELECT jsonb_agg(bank.get_account_info(account_id, account_type))
+                                FROM bank.account
+                                WHERE client_id = i),
+                               '[]'::jsonb
+                                   )
                )
-        from client
-        where client_id = i);
+        FROM bank.client
+        WHERE client_id = i
+    );
 END;
 $$;

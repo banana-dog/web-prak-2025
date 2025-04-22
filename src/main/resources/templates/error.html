@@ -1,0 +1,13 @@
+<!-- templates/error.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" , lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Ошибка</title>
+</head>
+<body>
+<h1>Произошла ошибка</h1>
+<p th:text="${message}">Что-то пошло не так</p>
+<a href="/clients">Назад к списку клиентов</a>
+</body>
+</html>

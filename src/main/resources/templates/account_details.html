@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html xmlns:th="http://www.thymeleaf.org" lang="ru">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Детали счета</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Детали счета</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <script th:inline="javascript">
+                /*<![CDATA[*/
+                try {
+                    const accountData = JSON.parse(/*[[${accountDetails}]]*/ '{}');
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.getElementById('accountId').textContent = accountData.id || 'Не указано';
+                        document.getElementById('accountType').textContent = accountData.type || 'Не указано';
+                        document.getElementById('accountBalance').textContent = accountData.balance || '0';
+                        document.getElementById('accountStatus').textContent = accountData.status === 'ACTIVE' ? 'Активен' : 'Неактивен';
+                        document.getElementById('accountCurrency').textContent = accountData.currency || 'Не указано';
+                        document.getElementById('accountOpenDate').textContent = accountData.openDate || 'Не указано';
+                        document.getElementById('accountClient').textContent = accountData.clientName || 'Не указано';
+
+                        // Дополнительные поля в зависимости от типа счета
+                        const detailsSection = document.getElementById('accountDetails');
+                        if (accountData.details) {
+                            for (const [key, value] of Object.entries(accountData.details)) {
+                                const row = document.createElement('div');
+                                row.className = 'row mb-2';
+                                row.innerHTML = `
+                                    <div class="col-sm-4 fw-bold">${key}:</div>
+                                    <div class="col-sm-8">${value || 'Не указано'}</div>
+                                `;
+                                detailsSection.appendChild(row);
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error parsing account data:', e);
+                }
+                /*]]>*/
+            </script>
+
+            <div class="row mb-3">
+                <div class="col-sm-4 fw-bold">Номер счета:</div>
+                <div class="col-sm-8" id="accountId"></div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4 fw-bold">Тип счета:</div>
+                <div class="col-sm-8" id="accountType"></div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4 fw-bold">Баланс:</div>
+                <div class="col-sm-8" id="accountBalance"></div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4 fw-bold">Статус:</div>
+                <div class="col-sm-8" id="accountStatus"></div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4 fw-bold">Валюта:</div>
+                <div class="col-sm-8" id="accountCurrency"></div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4 fw-bold">Дата открытия:</div>
+                <div class="col-sm-8" id="accountOpenDate"></div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm-4 fw-bold">Владелец:</div>
+                <div class="col-sm-8" id="accountClient"></div>
+            </div>
+
+            <h5 class="mt-4">Дополнительная информация</h5>
+            <div id="accountDetails" class="mt-3"></div>
+
+            <div class="mt-4">
+                <a th:href="@{/clients/{id}(id=${accountData.clientId})}" class="btn btn-primary">
+                    Назад к клиенту
+                </a>
+                <a href="/clients" class="btn btn-secondary ms-2">
+                    Назад к списку клиентов
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
