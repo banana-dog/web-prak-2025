@@ -187,17 +187,15 @@ public class ClientViewController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            // Prepare main account info
             AccountDAO.AccountMainInfo mainInfo = new AccountDAO.AccountMainInfo();
             mainInfo.setClientId(clientId);
             mainInfo.setType(Account.AccountType.valueOf(type));
             mainInfo.setCurrency(form.getCurrency());
             mainInfo.setBalance(form.getBalance());
             mainInfo.setBankBranchId(form.getBankBranchId());
-            mainInfo.setOpeningDate(new Date()); // or form.getOpeningDate() if you have it
+            mainInfo.setOpeningDate(new Date());
             mainInfo.setStatus(Account.Status.ACTIVE);
 
-            // Prepare additional info based on account type
             AccountDAO.AccountAdditionalInfo additionalInfo = new AccountDAO.AccountAdditionalInfo();
 
             switch (Account.AccountType.valueOf(type)) {
@@ -224,12 +222,10 @@ public class ClientViewController {
                     break;
             }
 
-            // Create AccountAllInfo and call AccountController
             AccountDAO.AccountAllInfo accountAllInfo = new AccountDAO.AccountAllInfo();
             accountAllInfo.setMainInfo(mainInfo);
             accountAllInfo.setAdditionalInfo(additionalInfo);
 
-            // You'll need to autowire AccountController or refactor to use AccountDAO directly
             accountViewController.createAccount(accountAllInfo);
 
             return "redirect:/clients/" + clientId;

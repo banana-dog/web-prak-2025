@@ -17,15 +17,14 @@ public class AccountForm {
     private Long bankBranchId;
     private Date openingDate;
 
-    // Fields for different account types
-    private Float overdraftLimit; // for CHECKING
-    private Float interestRate; // for SAVINGS, CREDIT, DEPOSIT
-    private String interestPayoutInterval; // for SAVINGS, CREDIT
-    private Float withdrawalLimit; // for SAVINGS
-    private Float maxCredit; // for CREDIT
-    private Float currentDebt; // for CREDIT
-    private String repaymentRestriction; // for CREDIT
-    private Account.PaymentMethod paymentMethod; // for CREDIT, DEPOSIT
+    private Float overdraftLimit;
+    private Float interestRate;
+    private String interestPayoutInterval;
+    private Float withdrawalLimit;
+    private Float maxCredit;
+    private Float currentDebt;
+    private String repaymentRestriction;
+    private Account.PaymentMethod paymentMethod;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date maturityDate; // for DEPOSIT
+    private Date maturityDate;
 }

@@ -64,7 +64,6 @@ public class AccountViewController {
             String accountDetailsJson = accountDAO.getAccountDetails(id)
                     .orElseThrow(() -> new RuntimeException("Account details not found"));
 
-            // Выводим данные для отладки
             System.out.println("Account Details JSON: " + accountDetailsJson);
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -90,9 +89,7 @@ public class AccountViewController {
                 return "redirect:/error";
             }
 
-            // Проверка статуса счета
             if (account.getAccountStatus() == Account.Status.SUSPENDED) {
-                // Можно добавить сообщение об ошибке через RedirectAttributes, если нужно
                 return "redirect:/accounts/" + id;
             }
 
@@ -141,7 +138,6 @@ public class AccountViewController {
             if (mainInfo.getBankBranchId() == null || bankBranchDAO.getById(mainInfo.getBankBranchId()) == null) {
                 throw new IllegalArgumentException("Invalid bank branch ID");
             }
-            // Создаем основной объект счета
             Account account = new Account();
             account.setClientId(clientDAO.getById(mainInfo.getClientId()));
             account.setAccountStatus(Account.Status.valueOf(String.valueOf(mainInfo.getStatus())));
@@ -151,10 +147,8 @@ public class AccountViewController {
             account.setBranchId(bankBranchDAO.getById(mainInfo.getBankBranchId()));
             account.setOpeningDate(mainInfo.getOpeningDate());
 
-            // Сохраняем основную информацию о счете
             accountDAO.save(account);
 
-            // Обрабатываем разные типы счетов
             switch (account.getAccountType()) {
                 case CHECKING:
                     CheckingAccount checkingAccount = new CheckingAccount();
@@ -181,7 +175,6 @@ public class AccountViewController {
                     creditAccount.setRepaymentRestriction(additionalInfo.getRepaymentRestriction());
                     creditAccount.setInterestPayoutInterval(additionalInfo.getInterestPayoutInterval());
 
-                    // Установка способа оплаты
                     Account.PaymentMethod paymentMethodStr = additionalInfo.getPaymentMethod();
                     if (paymentMethodStr == null) {
                         paymentMethodStr = Account.PaymentMethod.MANUAL; // значение по умолчанию

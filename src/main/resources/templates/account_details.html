@@ -41,7 +41,6 @@
 </head>
 <body>
 <div class="container py-4">
-    <!-- Верхняя навигация -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="display-5 fw-bold text-primary">
             <i class="bi bi-wallet2"></i> Детали счета
@@ -56,7 +55,6 @@
         </div>
     </div>
 
-    <!-- Основная информация о счете -->
     <div class="row">
         <div class="col-md-8">
             <div class="card details-card">
@@ -119,11 +117,9 @@
                         </div>
                     </div>
 
-                    <!-- Специфические детали счета -->
                     <div class="account-info-item">
                         <h5 class="mb-3">Детали счета</h5>
                         <div class="row">
-                            <!-- Расчетный счет -->
                             <div class="col-12" th:if="${account.accountType == account.accountType.CHECKING}">
                                 <p class="mb-2">
                                     <i class="bi bi-shield-check me-2"></i>
@@ -132,7 +128,6 @@
                                 </p>
                             </div>
 
-                            <!-- Сберегательный счет -->
                             <div class="col-12" th:if="${account.accountType == account.accountType.SAVINGS}">
                                 <p class="mb-2">
                                     <i class="bi bi-graph-up me-2"></i>
@@ -151,7 +146,6 @@
                                 </p>
                             </div>
 
-                            <!-- Кредитный счет -->
                             <div class="col-12" th:if="${account.accountType == account.accountType.CREDIT}">
                                 <p class="mb-2">
                                     <i class="bi bi-graph-up me-2"></i>
@@ -180,7 +174,6 @@
                                 </p>
                             </div>
 
-                            <!-- Депозитный счет -->
                             <div class="col-12" th:if="${account.accountType == account.accountType.DEPOSIT}">
                                 <p class="mb-2">
                                     <i class="bi bi-graph-up me-2"></i>
@@ -206,7 +199,6 @@
         </div>
 
         <div class="col-md-4">
-            <!-- Карточка с балансом -->
             <div class="card details-card balance-card mb-4">
                 <div class="card-body">
                     <h5 class="card-title mb-3">Текущий баланс</h5>
@@ -215,12 +207,10 @@
                 </div>
             </div>
 
-            <!-- Кнопки действий -->
             <div class="card details-card">
                 <div class="card-body">
                     <h5 class="card-title mb-3">Действия</h5>
 
-                    <!-- Форма изменения статуса -->
                     <form th:action="@{'/accounts/' + ${account.id} + '/status'}" method="post" class="mb-3">
                         <div class="mb-3">
                             <label for="newStatus" class="form-label">Изменить статус</label>
@@ -234,7 +224,6 @@
                         </button>
                     </form>
 
-                    <!-- Форма транзакции -->
                     <form th:action="@{'/accounts/' + ${account.id} + '/transaction'}"
                           method="post"
                           class="mb-3"
@@ -255,14 +244,12 @@
                         </button>
                     </form>
 
-                    <!-- Сообщение о недоступности транзакций -->
                     <div class="alert alert-warning mb-3"
                          th:if="${account.accountStatus == account.accountStatus.SUSPENDED}">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
                         Транзакции недоступны для приостановленного счета
                     </div>
 
-                    <!-- Форма закрытия счета -->
                     <form th:action="@{'/accounts/' + ${account.id} + '/delete'}"
                           method="post"
                           onsubmit="return confirm('Вы уверены, что хотите закрыть этот счет?');">
