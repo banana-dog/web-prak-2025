@@ -1,4 +1,4 @@
-package ru.cmc.msu.web_prak_2025.Controllers;
+package ru.cmc.msu.web_prak_2025.Controllers.trash;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;

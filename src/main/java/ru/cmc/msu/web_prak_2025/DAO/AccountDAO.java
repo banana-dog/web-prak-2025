@@ -39,6 +39,8 @@ public interface AccountDAO extends CommonDAO<Account, Long> {
         public Long clientId;
         public AccountType accountType;
         public Date openingDate;
+        public String firstName;
+        public String lastName;
     }
 
     @Getter

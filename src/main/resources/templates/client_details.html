@@ -5,366 +5,162 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Детали клиента</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
     <style>
-        .account-list {
-            max-height: 300px;
-            overflow-y: auto;
+        .detail-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: none;
             margin-bottom: 20px;
         }
-        .account-item {
-            cursor: pointer;
-            transition: background-color 0.2s;
+        .account-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 15px;
+            border: none;
         }
-        .account-item:hover {
-            background-color: #f8f9fa;
+        .account-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
-        .account-item.active {
-            background-color: #e9ecef;
-            font-weight: bold;
+        .checking-account { border-left: 4px solid #0d6efd; }
+        .savings-account { border-left: 4px solid #198754; }
+        .credit-account { border-left: 4px solid #fd7e14; }
+        .deposit-account { border-left: 4px solid #6f42c1; }
+        .natural-person { border-left: 4px solid #0d6efd; }
+        .legal-entity { border-left: 4px solid #198754; }
+        .account-balance {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-<div class="container mt-4">
-    <h1>Детали клиента</h1>
+<div class="container py-4">
+    <!-- Заголовок и навигация -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5 fw-bold text-primary">
+            <i class="bi bi-person-badge"></i> Детали клиента
+        </h1>
+        <a href="/clients" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> К списку клиентов
+        </a>
+    </div>
 
-    <div class="card">
+    <!-- Информация о клиенте -->
+    <div class="detail-card card mb-4" th:classappend="${type == 'NATURAL_PERSON' ? 'natural-person' : 'legal-entity'}">
         <div class="card-body">
-            <script th:inline="javascript">
-                /*<![CDATA[*/
-                // Замените существующий код обработки счетов на следующий:
-                try {
-                    const clientData = JSON.parse(/*[[${clientDetails}]]*/ '{}');
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const pathParts = window.location.pathname.split('/');
-                        const clientIdFromUrl = parseInt(pathParts[pathParts.length - 1]);
-                        const clientId = isNaN(clientIdFromUrl) ? null : clientIdFromUrl;
-                        if (clientId) {
-                            document.getElementById('clientId').value = clientId;
-                        }
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h3 class="card-title mb-3" th:text="${firstName + ' ' + lastName}">Имя клиента</h3>
+                    <div class="text-muted mb-2">
+                        <i class="bi bi-envelope"></i>
+                        <span th:text="${contacts}">Контакты</span>
+                    </div>
+                </div>
+                <span th:class="${type == 'NATURAL_PERSON' ? 'badge bg-primary' : 'badge bg-success'} + ' status-badge'"
+                      th:text="${type == 'NATURAL_PERSON' ? 'Физическое лицо' : 'Юридическое лицо'}">
+                    Тип клиента
+                </span>
+            </div>
+        </div>
+    </div>
 
-                        // Устанавливаем информацию о клиенте
-                        document.getElementById('clientName').textContent = clientData.name || 'Не указано';
-                        document.getElementById('clientContacts').textContent = clientData.contacts || 'Не указано';
-                        document.getElementById('clientId').value = clientId;
+    <!-- Секция счетов -->
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h4 mb-0">
+                <i class="bi bi-wallet2"></i> Счета клиента
+            </h2>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="bi bi-plus-circle"></i> Открыть новый счет
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" th:href="@{'/clients/' + ${clientId} + '/accounts/new?type=CHECKING'}">
+                        <i class="bi bi-credit-card text-primary"></i> Расчетный счет
+                    </a></li>
+                    <li><a class="dropdown-item" th:href="@{'/clients/' + ${clientId} + '/accounts/new?type=SAVINGS'}">
+                        <i class="bi bi-piggy-bank text-success"></i> Сберегательный счет
+                    </a></li>
+                    <li><a class="dropdown-item" th:href="@{'/clients/' + ${clientId} + '/accounts/new?type=CREDIT'}">
+                        <i class="bi bi-cash-stack text-warning"></i> Кредитный счет
+                    </a></li>
+                    <li><a class="dropdown-item" th:href="@{'/clients/' + ${clientId} + '/accounts/new?type=DEPOSIT'}">
+                        <i class="bi bi-safe text-purple"></i> Депозитный счет
+                    </a></li>
+                </ul>
+            </div>
+        </div>
 
-                        const typeBadge = document.getElementById('clientType');
-                        if (clientData.type === 'NATURAL_PERSON') {
-                            typeBadge.textContent = 'Физ. лицо';
-                            typeBadge.className = 'badge bg-primary';
-                        } else {
-                            typeBadge.textContent = 'Юр. лицо';
-                            typeBadge.className = 'badge bg-success';
-                        }
-
-                        const accountsList = document.getElementById('accountsList');
-                        const accountDetailsBtn = document.getElementById('viewAccountDetailsBtn');
-                        let selectedAccountId = null;
-
-                        // Проверяем наличие счетов в данных
-                        if (clientData.accounts && Array.isArray(clientData.accounts) && clientData.accounts.length > 0) {
-                            console.log('Processing accounts:', clientData.accounts);
-
-                            clientData.accounts.forEach(account => {
-                                const accountItem = document.createElement('div');
-                                accountItem.className = 'account-item p-3 border-bottom';
-
-                                // Форматируем дату
-                                const openingDate = account['account opening date'] ?
-                                    new Date(account['account opening date']).toLocaleDateString('ru-RU') : 'Не указано';
-
-                                // Получаем нужные данные из объекта account
-                                const accountId = account['account id'] || 'Не указано';
-                                const accountNumber = account['account number'] || 'Не указано';
-                                const accountType = account['account type'] || 'Не указано';
-                                const balance = account['current balance'] || '0';
-                                const currency = account['currency'] || 'RUB';
-                                const status = account['account status'] || 'ACTIVE';
-
-                                // Форматируем тип счета для отображения
-                                const accountTypeDisplay = {
-                                    'CHECKING': 'Текущий',
-                                    'SAVINGS': 'Сберегательный',
-                                    'CREDIT': 'Кредитный',
-                                    'DEPOSIT': 'Депозитный'
-                                }[accountType] || accountType;
-
-                                accountItem.innerHTML = `
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <strong>Счет №${accountNumber}</strong><br>
-                            ID: ${accountId} |
-                            Тип: ${accountTypeDisplay} |
-                            Баланс: ${balance} ${currency} |
-                            Дата открытия: ${openingDate}
-                        </div>
-                        <div>
-                            <span class="badge ${status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}">
-                                ${status === 'ACTIVE' ? 'Активен' : 'Неактивен'}
+        <!-- Список счетов -->
+        <div th:if="${accounts != null && !accounts.isEmpty()}" class="row">
+            <div th:each="account : ${accounts}" class="col-md-6">
+                <div class="account-card card"
+                     th:classappend="${account.get('account type').asText() == 'CHECKING'} ? 'checking-account' :
+                                    (${account.get('account type').asText() == 'SAVINGS'} ? 'savings-account' :
+                                    (${account.get('account type').asText() == 'CREDIT'} ? 'credit-account' : 'deposit-account'))">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <i th:class="${account.get('account type').asText() == 'CHECKING'} ? 'bi bi-credit-card text-primary' :
+                                              (${account.get('account type').asText() == 'SAVINGS'} ? 'bi bi-piggy-bank text-success' :
+                                              (${account.get('account type').asText() == 'CREDIT'} ? 'bi bi-cash-stack text-warning' : 'bi bi-safe text-purple'))">
+                                    </i>
+                                    <span th:text="${account.get('account type').asText() == 'CHECKING'} ? 'Текущий счет' :
+                                                  (${account.get('account type').asText() == 'SAVINGS'} ? 'Сберегательный счет' :
+                                                  (${account.get('account type').asText() == 'CREDIT'} ? 'Кредитный счет' : 'Депозитный счет'))">
+                                    </span>
+                                </h5>
+                                <h6 class="text-muted mb-0">
+                                    № <span th:text="${account.get('account number').asText()}"></span>
+                                </h6>
+                            </div>
+                            <span th:class="${account.get('account status').asText() == 'ACTIVE'} ? 'bg-success status-badge' : 'bg-secondary status-badge'"
+                                  th:text="${account.get('account status').asText() == 'ACTIVE'} ? 'Активен' : 'Неактивен'">
                             </span>
                         </div>
+
+                        <div class="mb-3">
+                            <span class="text-muted">Баланс:</span>
+                            <span class="account-balance ms-2"
+                                  th:classappend="${account.get('current balance').asDouble() >= 0} ? 'text-success' : 'text-danger'"
+                                  th:text="${account.get('current balance').asText() + ' ' + account.get('currency').asText()}">
+                            </span>
+                        </div>
+
+                        <div class="d-flex align-items-center text-muted small mb-3">
+                            <i class="bi bi-calendar me-2"></i>
+                            <span th:text="${account.get('account opening date').asText()}"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <a th:href="@{'/accounts/' + ${account.get('account id').asText()}}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Подробнее
+                            </a>
+                        </div>
                     </div>
-                `;
-
-                                accountItem.addEventListener('click', function() {
-                                    document.querySelectorAll('.account-item').forEach(item => {
-                                        item.classList.remove('active');
-                                    });
-                                    this.classList.add('active');
-                                    selectedAccountId = accountId;
-                                    accountDetailsBtn.disabled = false;
-                                });
-
-                                accountsList.appendChild(accountItem);
-                            });
-                        } else {
-                            console.log('No accounts found in clientData:', clientData);
-                            accountsList.innerHTML = '<div class="p-3 text-muted">У клиента нет счетов</div>';
-                            accountDetailsBtn.disabled = true;
-                        }
-
-                        // Добавляем обработчики кнопок
-                        document.getElementById('addAccountBtn').addEventListener('click', function() {
-                            const addAccountModal = new bootstrap.Modal(document.getElementById('addAccountModal'));
-                            addAccountModal.show();
-                        });
-
-                        accountDetailsBtn.addEventListener('click', function() {
-                            if (selectedAccountId) {
-                                window.location.href = `/accounts/${selectedAccountId}`;
-                            }
-                        });
-                    });
-                } catch (e) {
-                    console.error('Error processing client data:', e);
-                    console.error('Raw client data:', /*[[${clientDetails}]]*/);
-                }
-                /*]]>*/
-            </script>
-
-            <input type="hidden" id="clientId" value="">
-
-            <h5 class="card-title" id="clientName">Загрузка...</h5>
-            <p class="card-text">
-                <strong>Контактные данные:</strong> <span id="clientContacts">Загрузка...</span><br>
-                <strong>Тип:</strong> <span id="clientType" class="badge">Загрузка...</span>
-            </p>
-
-            <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-                <h5 class="mb-0">Счета клиента</h5>
-                <div>
-                    <button id="addAccountBtn" class="btn btn-primary me-2">
-                        <i class="bi bi-plus-circle"></i> Добавить счет
-                    </button>
-                    <button id="viewAccountDetailsBtn" class="btn btn-info" disabled>
-                        <i class="bi bi-eye"></i> Просмотреть информацию
-                    </button>
                 </div>
             </div>
+        </div>
 
-            <div class="account-list border rounded" id="accountsList">
-                <!-- Счета будут загружены здесь -->
-            </div>
-
-            <a href="/clients" class="btn btn-primary mt-3">Назад к списку</a>
+        <!-- Пустой список счетов -->
+        <div th:if="${accounts == null || accounts.isEmpty()}" class="text-center py-5">
+            <i class="bi bi-wallet2 text-muted" style="font-size: 3rem;"></i>
+            <h4 class="mt-3 text-muted">У клиента нет счетов</h4>
+            <p class="text-muted">Вы можете открыть новый счет, используя кнопку выше</p>
         </div>
     </div>
 </div>
 
-<!-- Заменить модальное окно добавления счета на следующий код -->
-<div class="modal fade" id="addAccountModal" tabindex="-1" aria-labelledby="addAccountModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addAccountModalLabel">Добавить новый счет</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addAccountForm">
-                <div class="modal-body">
-                    <input type="hidden" id="id">
-
-                    <!-- Базовые поля -->
-                    <div class="mb-3">
-                        <label for="accountType" class="form-label">Тип счета</label>
-                        <select class="form-select" id="accountType" required>
-                            <option value="">Выберите тип счета</option>
-                            <option value="CHECKING">Текущий</option>
-                            <option value="SAVINGS">Сберегательный</option>
-                            <option value="CREDIT">Кредитный</option>
-                            <option value="DEPOSIT">Депозитный</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="currency" class="form-label">Валюта</label>
-                        <select class="form-select" id="currency" required>
-                            <option value="RUB">Рубли (RUB)</option>
-                            <option value="USD">Доллары (USD)</option>
-                            <option value="EUR">Евро (EUR)</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="balance" class="form-label">Начальный баланс</label>
-                        <input type="number" step="0.01" class="form-control" id="balance" value="0">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="bankBranchId" class="form-label">Отделение банка</label>
-                        <select class="form-select" id="bankBranchId" required>
-                            <option value="">Выберите отделение банка</option>
-                        </select>
-                    </div>
-
-                    <!-- Поля для текущего счета -->
-                    <div id="checkingFields" style="display: none;">
-                        <div class="mb-3">
-                            <label for="overdraftLimit" class="form-label">Лимит овердрафта</label>
-                            <input type="number" step="0.01" class="form-control" id="overdraftLimit" value="0">
-                        </div>
-                    </div>
-
-                    <!-- Поля для сберегательного счета -->
-                    <div id="savingsFields" style="display: none;">
-                        <div class="mb-3">
-                            <label for="savingsInterestRate" class="form-label">Процентная ставка</label>
-                            <input type="number" step="0.01" class="form-control" id="savingsInterestRate" value="0">
-                        </div>
-                        <div class="mb-3">
-                            <label for="interestPayoutInterval" class="form-label">Интервал выплаты процентов</label>
-                            <input type="text" class="form-control" id="interestPayoutInterval">
-                        </div>
-                        <div class="mb-3">
-                            <label for="withdrawalLimit" class="form-label">Лимит снятия</label>
-                            <input type="number" step="0.01" class="form-control" id="withdrawalLimit" value="0">
-                        </div>
-                    </div>
-
-                    <!-- Поля для кредитного счета -->
-                    <div id="creditFields" style="display: none;">
-                        <div class="mb-3">
-                            <label for="creditInterestRate" class="form-label">Процентная ставка</label>
-                            <input type="number" step="0.01" class="form-control" id="creditInterestRate" value="0">
-                        </div>
-                        <div class="mb-3">
-                            <label for="maxCredit" class="form-label">Максимальный кредит</label>
-                            <input type="number" step="0.01" class="form-control" id="maxCredit" value="0">
-                        </div>
-                        <div class="mb-3">
-                            <label for="creditPaymentMethod" class="form-label">Метод платежа</label>
-                            <select class="form-select" id="creditPaymentMethod">
-                                <option value="AUTO">Автоматический</option>
-                                <option value="MANUAL">Ручной</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="creditInterestPayoutInterval" class="form-label">Интервал выплаты процентов</label>
-                            <input type="text" class="form-control" id="creditInterestPayoutInterval">
-                        </div>
-                    </div>
-
-                    <!-- Поля для депозитного счета -->
-                    <div id="depositFields" style="display: none;">
-                        <div class="mb-3">
-                            <label for="depositInterestRate" class="form-label">Процентная ставка</label>
-                            <input type="number" step="0.01" class="form-control" id="depositInterestRate" value="0">
-                        </div>
-                        <div class="mb-3">
-                            <label for="maturityDate" class="form-label">Дата погашения</label>
-                            <input type="date" class="form-control" id="maturityDate">
-                        </div>
-                        <div class="mb-3">
-                            <label for="depositPaymentMethod" class="form-label">Метод платежа</label>
-                            <select class="form-select" id="depositPaymentMethod">
-                                <option value="AUTO">Автоматический</option>
-                                <option value="MANUAL">Ручной</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Создать счет</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Добавить следующий скрипт после подключения Bootstrap -->
-<script>
-    document.getElementById('accountType').addEventListener('change', function() {
-        // Скрываем все специфичные поля
-        document.getElementById('checkingFields').style.display = 'none';
-        document.getElementById('savingsFields').style.display = 'none';
-        document.getElementById('creditFields').style.display = 'none';
-        document.getElementById('depositFields').style.display = 'none';
-
-        // Показываем поля в зависимости от выбранного типа счета
-        switch(this.value) {
-            case 'CHECKING':
-                document.getElementById('checkingFields').style.display = 'block';
-                break;
-            case 'SAVINGS':
-                document.getElementById('savingsFields').style.display = 'block';
-                break;
-            case 'CREDIT':
-                document.getElementById('creditFields').style.display = 'block';
-                break;
-            case 'DEPOSIT':
-                document.getElementById('depositFields').style.display = 'block';
-                // Устанавливаем дату погашения по умолчанию (через год)
-                const defaultMaturityDate = new Date();
-                defaultMaturityDate.setFullYear(defaultMaturityDate.getFullYear() + 1);
-                document.getElementById('maturityDate').valueAsDate = defaultMaturityDate;
-                break;
-        }
-    });
-</script>
-
-<!-- Подключаем Bootstrap Icons и JS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Функция для загрузки списка отделений банка
-    async function loadBankBranches() {
-        try {
-            const response = await fetch('/api/bank/all');
-            if (response.ok) {
-                const branches = await response.json();
-                const bankBranchSelect = document.getElementById('bankBranchId');
-                bankBranchSelect.innerHTML = '<option value="">Выберите отделение банка</option>';
-                branches.forEach(branch => {
-                    bankBranchSelect.innerHTML += `
-                    <option value="${branch.id}">
-                        ${branch.name} (${branch.address})
-                    </option>`;
-                });
-            } else {
-                console.error('Failed to load bank branches');
-            }
-        } catch (error) {
-            console.error('Error loading bank branches:', error);
-        }
-    }
-
-    // Загружать список отделений при открытии модального окна
-    document.getElementById('addAccountBtn').addEventListener('click', function() {
-        loadBankBranches();
-    });
-
-    // Обновить обработчик формы добавления счета
-    document.getElementById('addAccountForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const bankBranchId = parseInt(document.getElementById('bankBranchId').value);
-        if (!bankBranchId) {
-            alert('Пожалуйста, выберите отделение банка');
-
-        }
-
-        // ... остальной код обработчика формы ...
-    });
-</script>
 </body>
 </html>

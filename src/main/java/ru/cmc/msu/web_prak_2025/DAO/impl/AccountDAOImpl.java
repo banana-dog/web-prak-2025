@@ -35,16 +35,25 @@ public class AccountDAOImpl extends CommonDAOImpl<Account, Long> implements Acco
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Account> criteriaQuery = criteriaBuilder.createQuery(Account.class);
         Root<Account> root = criteriaQuery.from(Account.class);
+        Join<Account, Client> clientJoin = root.join("clientId");
         List<Predicate> predicates = new ArrayList<>();
 
         if (filter.getClientId() != null)
-            predicates.add(criteriaBuilder.equal(root.get("clientId"), filter.getClientId()));
+            predicates.add(criteriaBuilder.equal(clientJoin.get("id"), filter.getClientId())); // Changed this line
 
         if (filter.getAccountType() != null)
             predicates.add(criteriaBuilder.equal(root.get("accountType"), filter.getAccountType()));
 
         if (filter.getOpeningDate() != null)
             predicates.add(criteriaBuilder.equal(root.get("openingDate"), filter.getOpeningDate()));
+
+        if (filter.getFirstName() != null && !filter.getFirstName().isEmpty())
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(clientJoin.get("firstName")),
+                    "%" + filter.getFirstName().toLowerCase() + "%"));
+
+        if (filter.getLastName() != null && !filter.getLastName().isEmpty())
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(clientJoin.get("lastName")),
+                    "%" + filter.getLastName().toLowerCase() + "%"));
 
         if (!predicates.isEmpty())
             criteriaQuery.where(predicates.toArray(new Predicate[0]));
@@ -56,7 +65,7 @@ public class AccountDAOImpl extends CommonDAOImpl<Account, Long> implements Acco
     @Override
     public Optional<String> getAccountDetails(Long id) {
         try {
-            String sql = "SELECT    get_account_info(:id, (SELECT account_type FROM account WHERE account_id = :id))";
+            String sql = "SELECT    bank.get_account_info(:id, (SELECT account_type FROM bank.account WHERE account_id = :id))";
             Query query = entityManager.createNativeQuery(sql, String.class);
             query.setParameter("id", id);
 

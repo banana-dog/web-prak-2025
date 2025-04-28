@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_client_info(i BIGINT)
+CREATE OR REPLACE FUNCTION bank.get_client_info(i BIGINT)
     RETURNS jsonb
     LANGUAGE plpgsql AS
 $$

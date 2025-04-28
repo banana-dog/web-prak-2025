@@ -13,6 +13,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import ru.cmc.msu.web_prak_2025.DAO.AccountDAO;
 import ru.cmc.msu.web_prak_2025.models.Account;
+import ru.cmc.msu.web_prak_2025.models.AccountForm;
 import ru.cmc.msu.web_prak_2025.models.BankBranch;
 import ru.cmc.msu.web_prak_2025.models.Client;
 
@@ -372,7 +373,7 @@ public class AccountDAOImplTest {
 
     @Test
     public void testCreateCheckingAccount() {
-        AccountDAO.AccountAdditionalInfo info = mock(AccountDAO.AccountAdditionalInfo.class);
+        AccountForm info = mock(AccountForm.class);
         when(info.getOverdraftLimit()).thenReturn(500.0f);
         when(entityManager.find(Account.class, 1L)).thenReturn(account);
         doNothing().when(entityManager).persist(any());
@@ -383,7 +384,7 @@ public class AccountDAOImplTest {
 
     @Test
     public void testCreateSavingsAccount() {
-        AccountDAO.AccountAdditionalInfo info = mock(AccountDAO.AccountAdditionalInfo.class);
+        AccountForm info = mock(AccountForm.class);
         when(info.getInterestRate()).thenReturn(5.0f);
         when(info.getInterestPayoutInterval()).thenReturn("Monthly");
         when(info.getWithdrawalLimit()).thenReturn(1000.0f);
@@ -396,7 +397,7 @@ public class AccountDAOImplTest {
 
     @Test
     public void testCreateDepositAccount() throws ParseException {
-        AccountDAO.AccountAdditionalInfo info = mock(AccountDAO.AccountAdditionalInfo.class);
+        AccountForm info = mock(AccountForm.class);
         when(info.getInterestRate()).thenReturn(5.0f);
         when(info.getPaymentMethod()).thenReturn(Account.PaymentMethod.MANUAL);
         String dateString = "2025-03-26";
@@ -412,7 +413,7 @@ public class AccountDAOImplTest {
 
     @Test
     public void testCreateCreditAccount() {
-        AccountDAO.AccountAdditionalInfo info = mock(AccountDAO.AccountAdditionalInfo.class);
+        AccountForm info = mock(AccountForm.class);
         when(info.getMaxCredit()).thenReturn(5000.0f);
         when(info.getCurrentDebt()).thenReturn(2000.0f);
         when(info.getInterestRate()).thenReturn(10.0f);

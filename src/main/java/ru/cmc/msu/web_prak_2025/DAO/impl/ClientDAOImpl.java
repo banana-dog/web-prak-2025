@@ -10,6 +10,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 import ru.cmc.msu.web_prak_2025.DAO.ClientDAO;
+import ru.cmc.msu.web_prak_2025.models.Account;
 import ru.cmc.msu.web_prak_2025.models.Client;
 
 import org.springframework.stereotype.Repository;
@@ -64,6 +65,24 @@ public class ClientDAOImpl extends CommonDAOImpl<Client, Long> implements Client
         } catch (Exception e) {
             System.out.println("getClientDetails exception: " + e.getMessage());
             return Optional.empty();
+        }
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        try {
+            Client client = entityManager.find(Client.class, id);
+            if (client != null) {
+                // Сначала удаляем все связанные счета
+                for (Account account : client.getAccounts()) {
+                    entityManager.remove(account);
+                }
+                // Затем удаляем самого клиента
+                entityManager.remove(client);
+            }
+        } catch (Exception e) {
+            System.out.println("Error deleting client: " + e.getMessage());
+            throw e;
         }
     }
 

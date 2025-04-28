@@ -32,7 +32,7 @@ public class BankBranch implements CommonEntity<Long> {
     @NonNull
     private Integer clientsNumber = 0;
 
-    @OneToMany(mappedBy = "branchId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "branchId", orphanRemoval = true)
     @JsonIgnore
     @ToString.Exclude
     private List<Account> accounts;

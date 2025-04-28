@@ -1,6 +1,5 @@
-package ru.cmc.msu.web_prak_2025.Controllers;
+package ru.cmc.msu.web_prak_2025.Controllers.trash;
 
-import org.springframework.ui.Model;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,13 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.cmc.msu.web_prak_2025.DAO.ClientDAO;
-import ru.cmc.msu.web_prak_2025.DAO.impl.ClientDAOImpl;
 import ru.cmc.msu.web_prak_2025.models.Client;
 import ru.cmc.msu.web_prak_2025.models.Client.ClientType;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -114,14 +111,7 @@ public class ClientController {
         return ResponseEntity.ok().build();
     }
 
-    @Getter
-    @AllArgsConstructor
-    public static class ClientInfo {
-        private String firstName;
-        private String lastName;
-        private String contacts;
-        private String type;
-    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClient(@PathVariable Long id) {

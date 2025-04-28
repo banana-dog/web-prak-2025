@@ -1,102 +1,281 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title><!DOCTYPE html>
-        <html xmlns:th="http://www.thymeleaf.org" lang="ru">
-        <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Детали счета</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали счета</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        .details-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+        .account-type-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+        .transaction-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status-badge {
+            font-size: 0.9rem;
+            padding: 5px 15px;
+            border-radius: 10px;
+        }
+        .account-info-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .account-info-item:last-child {
+            border-bottom: none;
+        }
+        .balance-card {
+            background: linear-gradient(45deg, #0d6efd, #0a58ca);
+            color: white;
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-4">
-    <h1>Детали счета</h1>
+<div class="container py-4">
+    <!-- Верхняя навигация -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5 fw-bold text-primary">
+            <i class="bi bi-wallet2"></i> Детали счета
+        </h1>
+        <div>
+            <a th:href="@{/accounts}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> К списку счетов
+            </a>
+            <a th:href="@{'/clients/' + ${account.clientId.id}}" class="btn btn-outline-primary">
+                <i class="bi bi-person"></i> Профиль клиента
+            </a>
+        </div>
+    </div>
 
-    <div class="card">
-        <div class="card-body">
-            <script th:inline="javascript">
-                /*<![CDATA[*/
-                try {
-                    const accountData = JSON.parse(/*[[${accountDetails}]]*/ '{}');
-                    document.addEventListener('DOMContentLoaded', function() {
-                        document.getElementById('accountId').textContent = accountData.id || 'Не указано';
-                        document.getElementById('accountType').textContent = accountData.type || 'Не указано';
-                        document.getElementById('accountBalance').textContent = accountData.balance || '0';
-                        document.getElementById('accountStatus').textContent = accountData.status === 'ACTIVE' ? 'Активен' : 'Неактивен';
-                        document.getElementById('accountCurrency').textContent = accountData.currency || 'Не указано';
-                        document.getElementById('accountOpenDate').textContent = accountData.openDate || 'Не указано';
-                        document.getElementById('accountClient').textContent = accountData.clientName || 'Не указано';
+    <!-- Основная информация о счете -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card details-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="account-type-icon"
+                               th:classappend="${account.accountType == account.accountType.CHECKING} ? 'bi bi-credit-card text-primary'
+                                   : (${account.accountType == account.accountType.SAVINGS} ? 'bi bi-piggy-bank text-success'
+                                   : (${account.accountType == account.accountType.CREDIT} ? 'bi bi-cash-stack text-warning'
+                                   : 'bi bi-safe text-purple'))">
+                            </i>
+                            <div>
+                                <h4 class="mb-1">
+                                    <span th:switch="${account.accountType}">
+                                        <span th:case="${account.accountType.CHECKING}">Расчетный счет</span>
+                                        <span th:case="${account.accountType.DEPOSIT}">Депозитный счет</span>
+                                        <span th:case="${account.accountType.SAVINGS}">Сберегательный счет</span>
+                                        <span th:case="${account.accountType.CREDIT}">Кредитный счет</span>
+                                    </span>
+                                </h4>
+                                <h6 class="text-muted">№ <span th:text="${account.accountNo}"></span></h6>
+                            </div>
+                        </div>
+                        <span th:classappend="${account.accountStatus == account.accountStatus.ACTIVE} ? 'bg-success' : (${account.accountStatus == account.accountStatus.SUSPENDED} ? 'bg-warning' : 'bg-secondary')"
+                              class="status-badge text-white">
+                            <span th:text="${account.accountStatus == account.accountStatus.ACTIVE} ? 'Активен' : (${account.accountStatus == account.accountStatus.SUSPENDED} ? 'Приостановлен' : 'Закрыт')">
+                            </span>
+                        </span>
+                    </div>
 
-                        // Дополнительные поля в зависимости от типа счета
-                        const detailsSection = document.getElementById('accountDetails');
-                        if (accountData.details) {
-                            for (const [key, value] of Object.entries(accountData.details)) {
-                                const row = document.createElement('div');
-                                row.className = 'row mb-2';
-                                row.innerHTML = `
-                                    <div class="col-sm-4 fw-bold">${key}:</div>
-                                    <div class="col-sm-8">${value || 'Не указано'}</div>
-                                `;
-                                detailsSection.appendChild(row);
-                            }
-                        }
-                    });
-                } catch (e) {
-                    console.error('Error parsing account data:', e);
-                }
-                /*]]>*/
-            </script>
+                    <!-- Информация о владельце -->
+                    <div class="account-info-item">
+                        <h5 class="mb-3">Информация о владельце</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <i class="bi bi-person me-2"></i>
+                                    <strong>ФИО:</strong>
+                                    <span th:text="${account.clientId.lastName + ' ' + account.clientId.firstName}"></span>
+                                </p>
+                                <p class="mb-0">
+                                    <i class="bi bi-envelope me-2"></i>
+                                    <strong>Контакты:</strong>
+                                    <span th:text="${account.clientId.contacts}"></span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <i class="bi bi-bank me-2"></i>
+                                    <strong>Отделение банка:</strong>
+                                    <span th:text="${account.branchId.name}"></span>
+                                </p>
+                                <p class="mb-0">
+                                    <i class="bi bi-calendar me-2"></i>
+                                    <strong>Дата открытия:</strong>
+                                    <span th:text="${#dates.format(account.openingDate, 'dd.MM.yyyy')}"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="row mb-3">
-                <div class="col-sm-4 fw-bold">Номер счета:</div>
-                <div class="col-sm-8" id="accountId"></div>
+                    <!-- Специфические детали счета -->
+                    <div class="account-info-item">
+                        <h5 class="mb-3">Детали счета</h5>
+                        <div class="row">
+                            <!-- Расчетный счет -->
+                            <div class="col-12" th:if="${account.accountType == account.accountType.CHECKING}">
+                                <p class="mb-2">
+                                    <i class="bi bi-shield-check me-2"></i>
+                                    <strong>Лимит овердрафта:</strong>
+                                    <span th:text="${details.get('overdraft limit').asText() + ' ' + account.accountCurrency}"></span>
+                                </p>
+                            </div>
+
+                            <!-- Сберегательный счет -->
+                            <div class="col-12" th:if="${account.accountType == account.accountType.SAVINGS}">
+                                <p class="mb-2">
+                                    <i class="bi bi-graph-up me-2"></i>
+                                    <strong>Процентная ставка:</strong>
+                                    <span th:text="${details.get('interest rate').asText()}"></span>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="bi bi-clock me-2"></i>
+                                    <strong>Интервал выплат:</strong>
+                                    <span th:text="${details.get('interest payout interval').asText()}"></span>
+                                </p>
+                                <p class="mb-0">
+                                    <i class="bi bi-cash me-2"></i>
+                                    <strong>Лимит снятия:</strong>
+                                    <span th:text="${details.get('withdrawal limit').asText() + ' ' + account.accountCurrency}"></span>
+                                </p>
+                            </div>
+
+                            <!-- Кредитный счет -->
+                            <div class="col-12" th:if="${account.accountType == account.accountType.CREDIT}">
+                                <p class="mb-2">
+                                    <i class="bi bi-graph-up me-2"></i>
+                                    <strong>Процентная ставка:</strong>
+                                    <span th:text="${details.get('interest rate').asText()}"></span>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="bi bi-cash-stack me-2"></i>
+                                    <strong>Максимальная сумма кредита:</strong>
+                                    <span th:text="${details.get('maximum credit').asText() + ' ' + account.accountCurrency}"></span>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="bi bi-exclamation-circle me-2"></i>
+                                    <strong>Текущая задолженность:</strong>
+                                    <span th:text="${details.get('current debt').asText() + ' ' + account.accountCurrency}"></span>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="bi bi-shield-lock me-2"></i>
+                                    <strong>Ограничение на погашение:</strong>
+                                    <span th:text="${details.get('credit repayment restriction').asText()}"></span>
+                                </p>
+                                <p class="mb-0">
+                                    <i class="bi bi-credit-card me-2"></i>
+                                    <strong>Способ оплаты:</strong>
+                                    <span th:text="${details.get('payment method').asText()}"></span>
+                                </p>
+                            </div>
+
+                            <!-- Депозитный счет -->
+                            <div class="col-12" th:if="${account.accountType == account.accountType.DEPOSIT}">
+                                <p class="mb-2">
+                                    <i class="bi bi-graph-up me-2"></i>
+                                    <strong>Процентная ставка:</strong>
+                                    <span th:text="${details.get('interest rate').asText()}"></span>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="bi bi-calendar-check me-2"></i>
+                                    <strong>Дата закрытия:</strong>
+                                    <!-- Для даты используем форматирование, предполагая что она приходит как timestamp -->
+                                    <span th:text="${#dates.format(new java.util.Date(details.get('maturity date').asLong()), 'dd.MM.yyyy')}"></span>
+                                </p>
+                                <p class="mb-0">
+                                    <i class="bi bi-credit-card me-2"></i>
+                                    <strong>Способ оплаты:</strong>
+                                    <span th:text="${details.get('payment method').asText()}"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Карточка с балансом -->
+            <div class="card details-card balance-card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Текущий баланс</h5>
+                    <h2 class="mb-2" th:text="${#numbers.formatDecimal(account.currentBalance, 1, 2) + ' ' + account.accountCurrency}"></h2>
+                    <p class="mb-0" th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy HH:mm')}"></p>
+                </div>
             </div>
 
-            <div class="row mb-3">
-                <div class="col-sm-4 fw-bold">Тип счета:</div>
-                <div class="col-sm-8" id="accountType"></div>
-            </div>
+            <!-- Кнопки действий -->
+            <div class="card details-card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Действия</h5>
 
-            <div class="row mb-3">
-                <div class="col-sm-4 fw-bold">Баланс:</div>
-                <div class="col-sm-8" id="accountBalance"></div>
-            </div>
+                    <!-- Форма изменения статуса -->
+                    <form th:action="@{'/accounts/' + ${account.id} + '/status'}" method="post" class="mb-3">
+                        <div class="mb-3">
+                            <label for="newStatus" class="form-label">Изменить статус</label>
+                            <select class="form-select" id="newStatus" name="newStatus" required>
+                                <option value="ACTIVE" th:selected="${account.accountStatus == T(ru.cmc.msu.web_prak_2025.models.Account.Status).ACTIVE}">Активен</option>
+                                <option value="SUSPENDED" th:selected="${account.accountStatus == T(ru.cmc.msu.web_prak_2025.models.Account.Status).SUSPENDED}">Приостановлен</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100 mb-3">
+                            <i class="bi bi-toggle-on"></i> Изменить статус
+                        </button>
+                    </form>
 
-            <div class="row mb-3">
-                <div class="col-sm-4 fw-bold">Статус:</div>
-                <div class="col-sm-8" id="accountStatus"></div>
-            </div>
+                    <!-- Форма транзакции -->
+                    <form th:action="@{'/accounts/' + ${account.id} + '/transaction'}"
+                          method="post"
+                          class="mb-3"
+                          th:if="${account.accountStatus != T(ru.cmc.msu.web_prak_2025.models.Account.Status).SUSPENDED}">
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Сумма операции</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+                                <span class="input-group-text" th:text="${account.accountCurrency}"></span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rate" class="form-label">Комиссия</label>
+                            <input type="number" step="0.0001" class="form-control" id="rate" name="rate" value="1.0" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-left-right"></i> Выполнить операцию
+                        </button>
+                    </form>
 
-            <div class="row mb-3">
-                <div class="col-sm-4 fw-bold">Валюта:</div>
-                <div class="col-sm-8" id="accountCurrency"></div>
-            </div>
+                    <!-- Сообщение о недоступности транзакций -->
+                    <div class="alert alert-warning mb-3"
+                         th:if="${account.accountStatus == account.accountStatus.SUSPENDED}">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Транзакции недоступны для приостановленного счета
+                    </div>
 
-            <div class="row mb-3">
-                <div class="col-sm-4 fw-bold">Дата открытия:</div>
-                <div class="col-sm-8" id="accountOpenDate"></div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-sm-4 fw-bold">Владелец:</div>
-                <div class="col-sm-8" id="accountClient"></div>
-            </div>
-
-            <h5 class="mt-4">Дополнительная информация</h5>
-            <div id="accountDetails" class="mt-3"></div>
-
-            <div class="mt-4">
-                <a th:href="@{/clients/{id}(id=${accountData.clientId})}" class="btn btn-primary">
-                    Назад к клиенту
-                </a>
-                <a href="/clients" class="btn btn-secondary ms-2">
-                    Назад к списку клиентов
-                </a>
+                    <!-- Форма закрытия счета -->
+                    <form th:action="@{'/accounts/' + ${account.id} + '/delete'}"
+                          method="post"
+                          onsubmit="return confirm('Вы уверены, что хотите закрыть этот счет?');">
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-trash"></i> Закрыть счет
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

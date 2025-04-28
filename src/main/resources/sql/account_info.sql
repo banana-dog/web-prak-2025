@@ -5,6 +5,7 @@ $$SELECT jsonb_build_object(
                  'account id', a.account_id,
                  'account number', a.account_no,
                  'client', bank.client.first_name || ' ' || bank.client.last_name,
+                 'client id', bank.client.client_id,
                  'client contacts', bank.client.contacts,
                  'account status', a.status,
                  'currency', a.currency,
