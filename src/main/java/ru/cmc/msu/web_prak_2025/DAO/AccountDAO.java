@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import lombok.Setter;
 import org.springframework.transaction.annotation.Transactional;
 import ru.cmc.msu.web_prak_2025.models.Account.AccountType;
 import ru.cmc.msu.web_prak_2025.models.Account;
@@ -38,9 +39,12 @@ public interface AccountDAO extends CommonDAO<Account, Long> {
         public Long clientId;
         public AccountType accountType;
         public Date openingDate;
+        public String firstName;
+        public String lastName;
     }
 
     @Getter
+    @Setter
     class AccountAdditionalInfo {
         Float maxCredit;
         Float currentDebt;
@@ -54,6 +58,7 @@ public interface AccountDAO extends CommonDAO<Account, Long> {
     }
 
     @Getter
+    @Setter
     class AccountMainInfo {
         Long Id;
         Long accountNo;
@@ -67,6 +72,7 @@ public interface AccountDAO extends CommonDAO<Account, Long> {
     }
 
     @Getter
+    @Setter
     public class AccountAllInfo {
         AccountMainInfo mainInfo;
         AccountAdditionalInfo additionalInfo;

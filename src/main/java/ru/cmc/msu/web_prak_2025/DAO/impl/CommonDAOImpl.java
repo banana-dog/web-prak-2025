@@ -1,5 +1,6 @@
 package ru.cmc.msu.web_prak_2025.DAO.impl;
 
+import lombok.Setter;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.cmc.msu.web_prak_2025.DAO.CommonDAO;
@@ -13,6 +14,7 @@ import jakarta.persistence.PersistenceContext;
 @Repository
 public abstract class CommonDAOImpl<T extends CommonEntity<ID>, ID extends Serializable> implements CommonDAO<T, ID> {
 
+    @Setter
     @PersistenceContext
     protected EntityManager entityManager;
 

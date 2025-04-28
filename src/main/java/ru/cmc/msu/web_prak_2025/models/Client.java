@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "client")
+@Table(name = "client", schema = "bank")
 @Getter
 @Setter
 @ToString
@@ -43,7 +43,7 @@ public class Client implements CommonEntity<Long> {
     @Enumerated(EnumType.STRING)
     private ClientType type;
 
-    @OneToMany(mappedBy = "clientId", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "clientId", fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Account> accounts = new ArrayList<>();
 }

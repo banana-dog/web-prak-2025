@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список счетов</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        .account-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+            border: none;
+        }
+        .account-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .account-type-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        .checking-account {
+            border-left: 4px solid #0d6efd;
+        }
+        .savings-account {
+            border-left: 4px solid #198754;
+        }
+        .credit-account {
+            border-left: 4px solid #fd7e14;
+        }
+        .deposit-account {
+            border-left: 4px solid #6f42c1;
+        }
+        .account-balance {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        .filter-card {
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5 fw-bold text-primary">
+            <i class="bi bi-wallet2"></i> Список счетов
+        </h1>
+        <div>
+            <a href="/" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> На главную
+            </a>
+        </div>
+    </div>
+
+    <div class="card filter-card mb-4">
+        <div class="card-body">
+            <h5 class="card-title text-muted mb-3">
+                <i class="bi bi-funnel"></i> Фильтры
+            </h5>
+            <form th:action="@{/accounts}" method="get" class="row g-3">
+                <div class="col-md-2">
+                    <label for="clientId" class="form-label">ID клиента</label>
+                    <input type="number" class="form-control" id="clientId" name="clientId"
+                           th:value="${param.clientId}" placeholder="ID клиента">
+                </div>
+                <div class="col-md-2">
+                    <label for="firstName" class="form-label">Имя</label>
+                    <input type="text" class="form-control" id="firstName" name="firstName"
+                           th:value="${param.firstName}" placeholder="Имя клиента">
+                </div>
+                <div class="col-md-2">
+                    <label for="lastName" class="form-label">Фамилия</label>
+                    <input type="text" class="form-control" id="lastName" name="lastName"
+                           th:value="${param.lastName}" placeholder="Фамилия клиента">
+                </div>
+                <div class="col-md-2">
+                    <label for="accountType" class="form-label">Тип счета</label>
+                    <select class="form-select" id="accountType" name="accountType">
+                        <option value="">Все типы</option>
+                        <option value="CHECKING">Расчетный</option>
+                        <option value="SAVINGS">Сберегательный</option>
+                        <option value="CREDIT">Кредитный</option>
+                        <option value="DEPOSIT">Депозитный</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="openingDate" class="form-label">Дата открытия</label>
+                    <input type="date" class="form-control" id="openingDate" name="openingDate"
+                           th:value="${param.openingDate}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2 flex-grow-1">
+                        <i class="bi bi-search"></i> Поиск
+                    </button>
+                    <a th:href="@{/accounts}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${accounts != null && !accounts.isEmpty()}">
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div th:each="account : ${accounts}" class="col">
+                <div th:classappend="${account.accountType == account.accountType.CHECKING} ? 'checking-account' : (${account.accountType == account.accountType.SAVINGS} ? 'savings-account' : (${account.accountType == account.accountType.CREDIT} ? 'credit-account' : 'deposit-account'))"
+                     class="card account-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <i class="account-type-icon"
+                                       th:classappend="${account.accountType == account.accountType.CHECKING} ? 'bi bi-credit-card text-primary'
+                                           : (${account.accountType == account.accountType.SAVINGS} ? 'bi bi-piggy-bank text-success'
+                                           : (${account.accountType == account.accountType.CREDIT} ? 'bi bi-cash-stack text-warning'
+                                           : 'bi bi-safe text-purple'))">
+                                    </i>
+
+                                    <span th:switch="${account.accountType}">
+                                        <span th:case="${account.accountType.CHECKING}">Расчетный счет</span>
+                                        <span th:case="${account.accountType.SAVINGS}">Сберегательный счет</span>
+                                        <span th:case="${account.accountType.CREDIT}">Кредитный счет</span>
+                                        <span th:case="${account.accountType.DEPOSIT}">Депозитный счет</span>
+                                    </span>
+
+                                    <h6 class="text-muted mb-0">
+                                        № <span th:text="${account.accountNo}"></span>
+                                    </h6>
+                                </h5>
+                            </div>
+                            <span th:classappend="${account.accountStatus == account.accountStatus.ACTIVE} ? 'bg-success' : (${account.accountStatus == account.accountStatus.SUSPENDED} ? 'bg-warning' : 'bg-secondary')"
+                                  class="status-badge text-white">
+                                <span th:text="${account.accountStatus == account.accountStatus.ACTIVE} ? 'Активен' : (${account.accountStatus == account.accountStatus.SUSPENDED} ? 'Приостановлен' : 'Закрыт')">
+                                </span>
+                            </span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <span class="text-muted">Баланс:</span>
+                                <span class="account-balance ms-2"
+                                      th:classappend="${account.currentBalance >= 0} ? 'text-success' : 'text-danger'"
+                                      th:text="${#numbers.formatDecimal(account.currentBalance, 1, 2)} + ' ' + ${account.accountCurrency}">
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 text-muted small">
+                            <div class="col-6">
+                                <i class="bi bi-calendar"></i>
+                                <span th:text="${#dates.format(account.openingDate, 'dd.MM.yyyy')}"></span>
+                            </div>
+                            <div class="col-6">
+                                <i class="bi bi-bank"></i>
+                                <span th:text="${account.branchId.name}"></span>
+                            </div>
+                            <div class="col-12">
+                                <i class="bi bi-person"></i>
+                                <a th:href="@{'/clients/' + ${account.clientId.id}}" class="text-decoration-none">
+                                    <span th:text="${account.clientId.lastName} + ' ' + ${account.clientId.firstName}"></span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <a th:href="@{'/accounts/' + ${account.id}}" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-eye"></i> Подробнее
+                            </a>
+                            <a th:href="@{'/accounts/' + ${account.id} + '/transactions'}" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-arrow-left-right"></i> Операции
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${accounts == null || accounts.isEmpty()}" class="text-center py-5">
+        <i class="bi bi-wallet2 text-muted" style="font-size: 3rem;"></i>
+        <h4 class="mt-3 text-muted">Счета не найдены</h4>
+        <p class="text-muted">Попробуйте изменить параметры фильтрации</p>
+        <a th:href="@{/accounts}" class="btn btn-primary mt-2">
+            <i class="bi bi-arrow-counterclockwise"></i> Сбросить фильтры
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.Date;
 
 @Entity
-@Table(name = "account")
+@Table(name = "account", schema = "bank")
 @Getter
 @Setter
 @ToString
@@ -46,7 +46,7 @@ public class Account implements CommonEntity<Long> {
         this.accountNo = "ACC-" + Instant.now().toEpochMilli();
     }
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id", nullable = false)
     @ToString.Exclude
     @NonNull
@@ -64,6 +64,8 @@ public class Account implements CommonEntity<Long> {
 
     @Column(nullable = false, name = "current_balance")
     @NonNull
+    @Getter
+    @Setter
     private Float currentBalance;
 
     @Column(nullable = false, name = "account_type")
@@ -71,7 +73,7 @@ public class Account implements CommonEntity<Long> {
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "bank_branch")
     @ToString.Exclude
     @NonNull

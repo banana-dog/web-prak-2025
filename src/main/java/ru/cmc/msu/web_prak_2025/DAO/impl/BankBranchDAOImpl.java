@@ -35,7 +35,8 @@ public class BankBranchDAOImpl extends CommonDAOImpl<BankBranch, Long> implement
                 predicates.add(criteriaBuilder.like(root.get("name"), likeExpr(filter.getName())));
 
             if (filter.getClientsNumber() != null)
-                predicates.add(criteriaBuilder.equal(root.get("clientsNumber"), filter.getClientsNumber()));
+                // Заменяем equal на greaterThanOrEqualTo
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("clientsNumber"), filter.getClientsNumber()));
 
             if (!predicates.isEmpty())
                 criteriaQuery.where(predicates.toArray(new Predicate[0]));
@@ -48,7 +49,7 @@ public class BankBranchDAOImpl extends CommonDAOImpl<BankBranch, Long> implement
         }
     }
 
-    private String likeExpr(String param) {
+    String likeExpr(String param) {
         return "%" + param + "%";
     }
 

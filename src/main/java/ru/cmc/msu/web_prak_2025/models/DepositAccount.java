@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "deposit_account")
+@Table(name = "deposit_account", schema = "bank")
 @Getter
 @Setter
 @ToString
