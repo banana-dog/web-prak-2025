@@ -110,7 +110,7 @@
                                               (${account.get('account type').asText() == 'SAVINGS'} ? 'bi bi-piggy-bank text-success' :
                                               (${account.get('account type').asText() == 'CREDIT'} ? 'bi bi-cash-stack text-warning' : 'bi bi-safe text-purple'))">
                                     </i>
-                                    <span th:text="${account.get('account type').asText() == 'CHECKING'} ? 'Текущий счет' :
+                                    <span th:text="${account.get('account type').asText() == 'CHECKING'} ? 'Расчетный счет' :
                                                   (${account.get('account type').asText() == 'SAVINGS'} ? 'Сберегательный счет' :
                                                   (${account.get('account type').asText() == 'CREDIT'} ? 'Кредитный счет' : 'Депозитный счет'))">
                                     </span>
